@@ -28,6 +28,37 @@ function is_HTTP_ok(statuscode)
   return ret;
 }
 
+
+function EH_set_task_billing(taskId, isBillable)
+{
+    var headers = {
+        'Content-Type': 'application/json',
+        'X-Api-Key': API_TOKEN
+    };
+
+    var form = {
+        'unbillable': !isBillable
+    };
+
+    var options = {
+        'url': 'https://api.everhour.com/tasks/' + taskId + '/billing',
+        'method': 'PUT',
+        'headers': headers,
+        'json': true,
+        'body': form
+    };
+
+    HTTP(options, function(error, response, body){});/* {
+        if (error || is_HTTP_ok(response.statusCode) == false) {
+            var e = error ? error : new Error(response.statusCode + ":" + body.message);
+            console.log(e);
+        } else {
+            console.log("[INFO]" + JSON.stringify(body));
+        }
+    });*/
+}
+
+
 function EH_set_tasks(projectId, sectionId, tasks)
 {
 
@@ -60,6 +91,10 @@ function EH_set_tasks(projectId, sectionId, tasks)
                     var e = error ? error : new Error(response.statusCode + ":" + body.message);
                     reject(e);        
                 } else {
+                    if (NON_BILLABLE_TASKS.indexOf(form.name) >= 0) {
+                        //無償タスク
+                        EH_set_task_billing(body.id, false);
+                    }
                     console.log("[INFO]" + JSON.stringify(body));
                     resolve(body.id);
                 }
