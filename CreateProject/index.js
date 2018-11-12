@@ -267,7 +267,7 @@ module.exports = function (context, req) {
     } else {
         context.res = {
             status: 400,
-            body: "Bad request. invalid arg."
+            body: "Bad request. invalid arg.[" + req.body + "]"
         }
         context.done();        
     }
