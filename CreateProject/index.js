@@ -28,6 +28,47 @@ function is_HTTP_ok(statuscode)
   return ret;
 }
 
+function format_users(arr)
+{
+    var users = [];
+
+    arr.forEach(function(itm){
+        if (itm.status == 'active') {
+            users.push(itm.id);
+        }
+    });
+
+    return users;
+}
+
+
+function EH_get_users(callback)
+{
+  var ret = 0;
+  
+  var headers = {
+    'Content-Type': 'application/json',
+    'X-Api-Key': API_TOKEN
+  };
+
+  var options = {
+    'url': 'https://api.everhour.com/team/users',
+    'method': 'GET',
+    'headers': headers,
+    'json': true,
+  };
+
+  HTTP(options, function(error, response, body) {
+    if (error) {
+      callback(error, null);
+    } else {
+      var users = format_users(body);
+      callback(null, users);
+    }
+  });
+
+  return ret;
+};
 
 function EH_set_task_billing(taskId, isBillable)
 {
@@ -237,32 +278,48 @@ module.exports = function (context, req) {
 
     var projectCode = "";
     var projectName = "";
-    var owner = [];
+    //var owner = [];
 
     if ((req.body && req.body.projectCode && req.body.projectName && req.body.owner)) {
         projectCode = req.body.projectCode;
         projectName = req.body.projectName;
-        owner = req.body.owner;
+        //owner = req.body.owner;
         
         // administrator always on.
-        owner.push(ADMIN_ID);
+        //owner.push(ADMIN_ID);
 
-        EH_create_project(projectCode, projectName, owner)
-            .then(projectId => EH_set_sections(projectId))
-            .then(function(){
+        EH_get_users(function(error, users){
+            if(error) {
+                context.log(error);
                 context.res = {
-                    status: 200,
-                    body: "Project(" + projectCode + ":"+ projectName + ") has created."
+                    status: 500,
+                    body: error.message
                 }
                 context.done();
-            })
-            .catch(function(err){
-                context.res = {
-                    status: 400,
-                    body: err.message
-                }
-                context.done();
-            });
+            } else {
+                
+                members = users;
+
+                EH_create_project(projectCode, projectName, members)
+                .then(projectId => EH_set_sections(projectId))
+                .then(function(){
+                    context.res = {
+                        status: 200,
+                        body: "Project(" + projectCode + ":"+ projectName + ") has created."
+                    }
+                    context.done();
+                })
+                .catch(function(err){
+                    context.res = {
+                        status: 400,
+                        body: err.message
+                    }
+                    context.done();
+                });    
+            }
+        });
+
+
 
     } else {
         context.res = {
