@@ -12,7 +12,7 @@ const BILLABLE_TASKS =  ["[AA]コンセプト設計", "[AB]仕様作成", "[AC]�
                       "[BA]単体テスト", "[BB]結合テスト", "[BC]総合テスト","[BD]システムテスト", 
                       "[CA]プロジェクト管理", "[CB]マスタ作成", 
                       "[DA]バグ修正(瑕疵期間外)"];
-const NON_BILLABLE_TASKS = ["[KA]企画", "[KB]調査", "[LA]バグ修正(瑕疵対応)"];
+const NON_BILLABLE_TASKS = ["[KA]企画", "[KB]調査", "[LA]バグ修正(瑕疵対応)", "[MA]PJメンター活動"];
 
 
 function is_HTTP_ok(statuscode)
